@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,15 @@ import (
 
 type Collection struct {
 	Name string `json:"name" bson:"Name"`
+}
+
+type Character struct {
+	Name                string     `json:"name" bson:"Name"`
+	CurrentlyObtainable bool       `json:"currentlyObtainable" bson:"CurrentlyObtainable"`
+	Premium             bool       `json:"premium" bson:"Premium"`
+	LimitedTime         bool       `json:"limitedTime" bson:"LimitedTime"`
+	MaxLevel            int        `json:"maxLevel" bson:"MaxLevel"`
+	Collection          Collection `json:"collection" bson:"Colleciton"`
 }
 
 func main() {
@@ -29,7 +39,14 @@ func main() {
 }
 
 func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
+	var character Character
+	reqBody, _ := io.ReadAll(r.Body)
+	err := json.Unmarshal(reqBody, &character)
+	if err != nil {
+		fmt.Println("error reading body")
+	}
 
+	fmt.Println(character.Collection.Name)
 }
 
 func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
