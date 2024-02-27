@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -49,15 +51,13 @@ func connect() {
 		log.Fatal("could not connect to postgres")
 	}
 
-	defer db.Close()
-
-	db = postgres
-
-	err = db.Ping()
+	defer postgres.Close()
+	err = postgres.Ping()
 	if err != nil {
 		panic(err)
 	}
 
+	db = postgres
 	fmt.Println("Connection Successful!")
 }
 
