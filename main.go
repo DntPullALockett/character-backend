@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -36,6 +37,17 @@ func main() {
 	}
 
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
+
+	connect()
+}
+
+func connect() {
+	_, err := sql.Open("postgres", os.Getenv("DATABASE_PRIVATE_URL"))
+	if err != nil {
+		log.Fatal("could not connect to postgres")
+	}
+
+	fmt.Println("Connection Successful!")
 }
 
 func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
