@@ -38,8 +38,12 @@ func main() {
 	log.SetPrefix("character service: ")
 	log.SetFlags(0)
 
-	http.HandleFunc("POST /characters/create", createCharacterHandler)
-	http.HandleFunc("POST /collections/create", createCollectionHandler)
+	//Character Handlers
+	http.HandleFunc("POST /characters", createCharacterHandler)
+
+	//Collection Handlers
+	http.HandleFunc("GET /collections", getCollectionsHandler)
+	http.HandleFunc("POST /collections", createCollectionHandler)
 
 	port := os.Getenv("PORT")
 
@@ -48,6 +52,7 @@ func main() {
 	}
 
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
+	getAllCharacters()
 }
 
 func connect() {
@@ -69,7 +74,10 @@ func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error reading body")
 	}
+}
 
+func getCollectionsHandler(w http.ResponseWriter, r *http.Request) {
+	getAllCharacters()
 }
 
 func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,8 +90,21 @@ func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.Create(&collection)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(collection)
 }
 
-func getAllCharacters() {
+func getAllCharacters() []Collection {
+	var collections []Collection
+	result := db.Find(&collections)
+	if result.Error != nil {
+		fmt.Println("could not obtain collections")
+	}
 
+	for row := range result.RowsAffected {
+		fmt.Println(collections[row])
+	}
+
+	return collections
 }
