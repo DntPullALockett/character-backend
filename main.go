@@ -64,6 +64,7 @@ func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
+	connect()
 	var collection Collection
 
 	err := json.NewDecoder(r.Body).Decode(&collection)
