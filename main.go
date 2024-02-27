@@ -44,12 +44,21 @@ func main() {
 }
 
 func connect() {
-	postgres, err := sql.Open("postgres", os.Getenv("DATABASE_PRIVATE_URL"))
+	connectionStr := os.Getenv("DATABASE_URL")
+	postgres, err := sql.Open("postgres", connectionStr)
 	if err != nil {
 		log.Fatal("could not connect to postgres")
 	}
 
+	defer db.Close()
+
 	db = postgres
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Connection Successful!")
 }
 
