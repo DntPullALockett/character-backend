@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,16 +8,19 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var db *sql.DB
+var db *gorm.DB
 
 type Collection struct {
+	gorm.Model
 	Name string `json:"name" bson:"Name"`
 }
 
 type Character struct {
+	gorm.Model
 	Name                string     `json:"name" bson:"Name"`
 	CurrentlyObtainable bool       `json:"currentlyObtainable" bson:"CurrentlyObtainable"`
 	Premium             bool       `json:"premium" bson:"Premium"`
@@ -46,19 +48,12 @@ func main() {
 
 func connect() {
 	connectionStr := os.Getenv("DATABASE_URL")
-	postgres, err := sql.Open("postgres", connectionStr)
+	postgres, err := gorm.Open(postgres.Open(connectionStr))
 	if err != nil {
-		log.Fatal("could not connect to postgres")
-	}
-
-	defer postgres.Close()
-	err = postgres.Ping()
-	if err != nil {
-		panic(err)
+		log.Fatal("could not connect to dmkt database")
 	}
 
 	db = postgres
-	fmt.Println("Connection Successful!")
 }
 
 func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
@@ -80,10 +75,9 @@ func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error reading body")
 	}
 
-	var collectionId int
-	rowErr := db.QueryRow(`INSERT INTO collections(name) VALUES(collection.Name) RETURNING id`).Scan(&collectionId)
-	if rowErr != nil {
-		fmt.Println("error inserting collection")
-	}
-	fmt.Println(collectionId)
+	db.Create(collection)
+}
+
+func getAllCharacters() {
+
 }
