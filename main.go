@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+var db *sql.DB
+
 type Collection struct {
 	Name string `json:"name" bson:"Name"`
 }
@@ -42,11 +44,12 @@ func main() {
 }
 
 func connect() {
-	_, err := sql.Open("postgres", os.Getenv("DATABASE_PRIVATE_URL"))
+	postgres, err := sql.Open("postgres", os.Getenv("DATABASE_PRIVATE_URL"))
 	if err != nil {
 		log.Fatal("could not connect to postgres")
 	}
 
+	db = postgres
 	fmt.Println("Connection Successful!")
 }
 
@@ -58,7 +61,6 @@ func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error reading body")
 	}
 
-	fmt.Println(character.Collection.Name)
 }
 
 func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
@@ -70,5 +72,10 @@ func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error reading body")
 	}
 
-	fmt.Println(collection.Name)
+	var collectionId int
+	rowErr := db.QueryRow(`INSERT INTO collections(name) VALUES(collection.Name) RETURNING id`).Scan(&collectionId)
+	if rowErr != nil {
+		fmt.Println("error inserting collection")
+	}
+	fmt.Println(collectionId)
 }
