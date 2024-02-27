@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,6 +28,9 @@ type Character struct {
 	LimitedTime         bool       `json:"limitedTime" bson:"LimitedTime"`
 	MaxLevel            int        `json:"maxLevel" bson:"MaxLevel"`
 	Collection          Collection `json:"collection" bson:"Colleciton"`
+	CreatedAt           time.Time  `gorm:"column:createdAt"`
+	UpdatedAt           time.Time  `gorm:"column:updatedAt"`
+	DeletedAt           time.Time  `gorm:"column:deletedAt"`
 }
 
 func main() {
@@ -54,6 +58,8 @@ func connect() {
 	}
 
 	db = postgres
+	fmt.Println("Connected to DMKT database!")
+	db.AutoMigrate(&Collection{})
 }
 
 func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +81,7 @@ func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error reading body")
 	}
 
-	db.Create(collection)
+	db.Create(&collection)
 }
 
 func getAllCharacters() {
