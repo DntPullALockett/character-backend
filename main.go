@@ -26,6 +26,7 @@ type Character struct {
 }
 
 func main() {
+	connect()
 	log.SetPrefix("character service: ")
 	log.SetFlags(0)
 
@@ -39,8 +40,6 @@ func main() {
 	}
 
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
-
-	connect()
 }
 
 func connect() {
@@ -73,7 +72,6 @@ func createCharacterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createCollectionHandler(w http.ResponseWriter, r *http.Request) {
-	connect()
 	var collection Collection
 
 	err := json.NewDecoder(r.Body).Decode(&collection)
